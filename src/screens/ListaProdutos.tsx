@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Text,
   View,
@@ -20,21 +20,25 @@ export default function ListaProdutos({
   navigation,
 }: Props) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const repository = new ProdutoRepository();
 
-  const carregarProdutos = async () => {
-    const lista = await repository.obterTodos();
+  const repository = useMemo(
+    () => new ProdutoRepository(),
+    []
+  );
+
+  const carregarProdutos = useCallback(() => {
+    const lista = repository.obterTodos();
     setProdutos(lista);
-  };
+  }, [repository]);
 
   useFocusEffect(
     useCallback(() => {
       carregarProdutos();
-    }, [])
+    }, [carregarProdutos])
   );
 
-  const excluirProduto = async (codigo: number) => {
-    await repository.remover(codigo);
+  const excluirProduto = (codigo: number) => {
+    repository.remover(codigo);
     carregarProdutos();
   };
 
